@@ -1,6 +1,9 @@
 ---
 title: "Template"
-format: html
+format: 
+  html:
+  code-fold:true
+  toc:true
 execute:
   eval: false
 ---
@@ -18,9 +21,11 @@ library(tmap)
 
 
 What do we need to change to get the data to load in the following chunk?
+We need to specify the name of the folder and the name of the csv file
+
 
 ```{r}
-sfo_trees_df<-read_csv(here("data","trees")) |> janitor::clean_names()
+sfo_trees_df<-read_csv(here("data","sfo_trees", "sfo_trees.csv")) |> janitor::clean_names()
 ```
 
 ## Part 1: Data exploration
@@ -30,13 +35,26 @@ Look at `sfo_trees_df` dataframe. How many observations are there? What does the
 What are some interesting questions you could ask about the data?
 
 Write them below:
+What does the legal status mean? 
+Are the addresses in San Francisco? 
+What does site order mean? 
 
-
-
-
-
-
-
+How many count of each observation by legal status? SHould we focus on the highest trees? 
+```{r}
+unique(sfo_trees_df$legal_status)
+Graph_data<- sfo_trees_df |>
+  group_by(legal_status)|>
+  summarize(tree_count=n()) |>
+  slice_max(tree_count, n=5)
+```
+```{r}
+# Barplot
+ggplot(Graph_data, aes(x=legal_status, y=tree_count)) +
+  geom_bar(stat = "identity")+
+  labs(y= "Tree Count", x = "Legal Status")+
+  theme_minimal()+
+  theme(axis.text.x=element_text(angle=45, hjust=1))
+```
 
 
 ### Example 2
@@ -45,14 +63,18 @@ Describe what this piece of code does. Feel free to run it to help you understan
 
 ```{r}
 permitted_mta_dpw<-sfo_trees_df |> 
-  filter(legal_status == 'Permitted Site' & %in% c("MTA","DPW"))
+  filter(legal_status == 'Permitted Site' & caretaker %in% c("MTA","DPW"))
 ```
 
 
-What does the `%in%` do? Write an example to explain the `%in%` operator to your neighbor using the empty code chunk below
+What does the `%in%` do? Write an example to explain the `%in%` operator to your neighbor using the empty code chunk below. It specifies what values in the caretaker column you wish to keep in the new data frame
 
 ```{r}
+sfo_trees_df%>%
+  filter(legal_status %in% c("Permitted Site", "Undocumented"))
 
+ex<-seq(1:10)
+ex %in% c(1,2,11)
 ```
 
 
